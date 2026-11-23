@@ -1,0 +1,17 @@
+#!/bin/sh
+# Builds bin/ghostcto-herdr from this checkout. herdr runs this at
+# `herdr plugin install`; run it by hand after `herdr plugin link`.
+set -eu
+cd "$(dirname "$0")/.."
+if ! command -v cargo >/dev/null 2>&1; then
+  echo "ghostcto-herdr: Cargo is needed to build this plugin: https://rustup.rs" >&2
+  exit 1
+fi
+cargo build --release --locked --target-dir target
+mkdir -p bin
+# Replace the binary with a new file rather than overwriting it: on macOS,
+# rewriting an executable in place invalidates its code signature and the
+# kernel kills the next run.
+cp target/release/ghostcto-herdr bin/.ghostcto-herdr.new
+mv -f bin/.ghostcto-herdr.new bin/ghostcto-herdr
+echo "ghostcto-herdr: built bin/ghostcto-herdr"

@@ -1,0 +1,30 @@
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  pr-title:
+    name: pr-title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      # The title and body arrive through the environment, never interpolated
+      # into the script, so they cannot inject shell commands.
+      - name: Conventional title, no AI attribution
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if ! printf '%s' "$TITLE" | grep -Eq '^(feat|fix|docs|refactor|test|build|ci|chore|perf|revert)(\([a-z0-9-]+\))?!?: .+'; then
+            echo "::error::The title must be a Conventional Commit, such as 'fix(herdr): keep focus on the agent'."
+            exit 1
+          fi
+          if printf '%s\n%s' "$TITLE" "$BODY" | grep -Eiq 'co-authored-by:.*(claude|anthropic|openai|chatgpt|copilot|gemini|cursor)|generated (with|by) .*(claude|chatgpt|copilot|gemini|cursor|ai)'; then
+            echo "::error::Remove AI model or tool attribution from the title and description."
+            exit 1
+          fi

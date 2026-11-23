@@ -1,0 +1,25 @@
+id = "ghostcto"
+name = "GhostCTO ghosts"
+version = "0.1.0"
+min_herdr_version = "0.9.5"
+description = "Shows which GhostCTO profile a Claude Code agent is using, as ghosts in a pane."
+platforms = ["macos", "linux"]
+
+# Runs once at `herdr plugin install`: builds bin/ghostcto-herdr with Cargo.
+# A linked checkout needs `sh scripts/plugin-build` run by hand.
+[[build]]
+command = ["sh", "scripts/plugin-build"]
+
+# Opens the ghosts pane as a split beside the focused agent and watches it.
+[[actions]]
+id = "ghosts"
+title = "GhostCTO: show ghosts for this agent"
+contexts = ["workspace"]
+command = ["./bin/ghostcto-herdr", "open"]
+
+# Opened by the action with GHOSTCTO_WATCH_PANE set to the agent's pane.
+[[panes]]
+id = "ghosts"
+title = "GhostCTO ghosts"
+placement = "split"
+command = ["./bin/ghostcto-herdr", "pane"]
